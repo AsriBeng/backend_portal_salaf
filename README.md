@@ -103,6 +103,24 @@ php artisan test
 > [!IMPORTANT]
 > Seeder membuat akun admin awal. Kredensialnya ada di `database/seeders/DatabaseSeeder.php`, atau atur sendiri lewat `ADMIN_USERNAME` dan `ADMIN_PASSWORD` di `.env` sebelum menjalankan seeding. **Segera ganti password setelah login pertama.**
 
+### 🧪 Data Demo
+
+Untuk mencoba aplikasi dengan data contoh (akun pengurus, 3 komplek, 8 kamar, 14 santri putra/putri):
+
+```bash
+php artisan db:seed --class=DemoSeeder
+```
+
+| Akun | Peran | Password |
+|---|---|---|
+| `sekretaris_putra` · `sekretaris_putri` | Sekretaris | lihat `DemoSeeder::DEMO_PASSWORD` |
+| `bendahara_putra` · `bendahara_putri` | Bendahara | lihat `DemoSeeder::DEMO_PASSWORD` |
+| `2025001` | Santri putra | lihat `DemoSeeder::DEMO_PASSWORD` |
+| `2025002` – `2025105` | Santri lain | tanggal lahir (`ddmmyyyy`) |
+
+> [!CAUTION]
+> Jangan jalankan `DemoSeeder` di server yang sudah berisi data asli. Jika terlanjur menjalankannya di hosting, nonaktifkan atau ganti password akun-akun demo di atas.
+
 ## 🌐 Upload ke Hosting
 
 <details>
