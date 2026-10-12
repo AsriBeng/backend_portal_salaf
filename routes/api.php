@@ -69,6 +69,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     */
     Route::middleware('role:santri')->group(function () {
         Route::get('/kartu-saya', [KartuController::class, 'saya']);
+        Route::get('/profil-santri', [SantriController::class, 'saya']);
     });
 
     Route::middleware('role:santri,admin,bendahara')->group(function () {

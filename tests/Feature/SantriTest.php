@@ -141,6 +141,21 @@ class SantriTest extends TestCase
         $this->actingAs($santri->user)->get("/api/santri/{$santri->id}/dokumen/file_kk")->assertOk();
     }
 
+    public function test_santri_melihat_data_dirinya_sendiri_saja(): void
+    {
+        $santri = Santri::factory()->create(['nik' => '3517000000000009']);
+        $lain = Santri::factory()->create();
+
+        $this->actingAs($santri->user)->getJson('/api/profil-santri')
+            ->assertOk()
+            ->assertJsonPath('data.nis', $santri->nis)
+            ->assertJsonPath('data.nik', '3517000000000009');
+
+        // Santri tidak boleh membuka data santri lain
+        $this->actingAs($santri->user)->getJson("/api/santri/{$lain->id}")->assertForbidden();
+        $this->actingAs($santri->user)->getJson("/api/santri/{$lain->id}/dokumen/foto_profil")->assertNotFound();
+    }
+
     public function test_verifikasi_kartu_lewat_qr(): void
     {
         $santri = Santri::factory()->create(['nama_lengkap' => 'Ahmad Fauzi']);

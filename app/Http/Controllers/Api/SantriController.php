@@ -69,6 +69,15 @@ class SantriController extends Controller
         return (new SantriResource($santri->load('kamar.komplek', 'user')))->response()->setStatusCode(201);
     }
 
+    /** Data lengkap milik santri yang login (dipakai juga oleh wali). */
+    public function saya(Request $request): SantriResource
+    {
+        $santri = $request->user()->santri;
+        abort_unless($santri, 404, 'Data santri tidak ditemukan.');
+
+        return new SantriResource($santri->load('kamar.komplek', 'user'));
+    }
+
     public function show(Request $request, Santri $santri): SantriResource
     {
         $this->pastikanAkses($request, $santri);

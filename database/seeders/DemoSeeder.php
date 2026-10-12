@@ -3,12 +3,21 @@
 namespace Database\Seeders;
 
 use App\Enums\Gender;
+use App\Enums\JenisTagihanTipe;
+use App\Enums\KasTipe;
 use App\Enums\Role;
+use App\Models\JenisTagihan;
 use App\Models\Kamar;
+use App\Models\KasTransaksi;
+use App\Models\KategoriKas;
 use App\Models\Komplek;
 use App\Models\Santri;
+use App\Models\Tagihan;
 use App\Models\User;
+use App\Services\PembayaranService;
+use App\Services\TagihanService;
 use Illuminate\Database\Seeder;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -23,6 +32,11 @@ use Illuminate\Support\Facades\DB;
  *   sekretaris_putra, sekretaris_putri, bendahara_putra, bendahara_putri
  * Akun santri contoh: NIS 2025001 dengan password DEMO_PASSWORD.
  * Santri lain: password = tanggal lahir (ddmmyyyy).
+ *
+ * Keuangan contoh (hanya dibuat jika belum ada tagihan sama sekali):
+ * SPP Rp 150.000 untuk bulan lalu dan bulan ini, Iuran Ziarah untuk santri putra,
+ * beberapa pembayaran (lunas, dicicil, dan bukti transfer yang menunggu verifikasi),
+ * serta satu pengeluaran kas putra.
  */
 class DemoSeeder extends Seeder
 {
@@ -38,7 +52,94 @@ class DemoSeeder extends Seeder
             $this->santri($kamar);
         });
 
+        $this->keuangan();
+
         $this->command?->info('Data demo siap. Lihat komentar di DemoSeeder untuk daftar akun.');
+    }
+
+    private function keuangan(): void
+    {
+        if (Tagihan::exists()) {
+            return;
+        }
+
+        $spp = JenisTagihan::where('tipe', JenisTagihanTipe::Spp)->first();
+        if ($spp->nominal == 0) {
+            $spp->update(['nominal' => 150000]);
+        }
+        $ziarah = JenisTagihan::firstOrCreate(
+            ['nama' => 'Iuran Ziarah', 'tipe' => JenisTagihanTipe::Iuran],
+            ['nominal' => 250000],
+        );
+
+        $tagihanService = app(TagihanService::class);
+        $bayar = app(PembayaranService::class);
+        $bendaharaPutra = User::where('username', 'bendahara_putra')->first();
+        $bendaharaPutri = User::where('username', 'bendahara_putri')->first();
+
+        $bulanLalu = now()->subMonthNoOverflow()->startOfMonth();
+        $tagihanService->generateSpp($bulanLalu);
+        $tagihanService->generateSpp(now());
+        $tagihanService->buatIuran($ziarah, 'Iuran Ziarah Wali Songo', 250000, Gender::Putra, null, now()->addMonth(), $bendaharaPutra);
+
+        $sppLalu = fn (string $nis) => Tagihan::whereHas('santri', fn ($q) => $q->where('nis', $nis))
+            ->where('jenis_tagihan_id', $spp->id)
+            ->whereDate('periode', $bulanLalu)
+            ->first();
+
+        $tanggal = $bulanLalu->copy()->addDays(9)->toDateString();
+
+        // Lunas tunai, dicicil, dan dibayar oleh bendahara putri
+        $bayar->buat($sppLalu('2025002'), ['nominal' => 150000, 'metode' => 'tunai', 'tanggal_bayar' => $tanggal], null, $bendaharaPutra);
+        $bayar->buat($sppLalu('2025003'), ['nominal' => 75000, 'metode' => 'tunai', 'tanggal_bayar' => $tanggal, 'catatan' => 'Cicilan pertama'], null, $bendaharaPutra);
+        $bayar->buat($sppLalu('2025101'), ['nominal' => 150000, 'metode' => 'transfer', 'tanggal_bayar' => $tanggal], null, $bendaharaPutri);
+
+        // Bukti transfer dari santri yang menunggu verifikasi
+        foreach (['2025001' => 150000, '2025004' => 100000, '2025102' => 150000] as $nis => $nominal) {
+            $santri = Santri::where('nis', $nis)->first();
+            $bayar->buat(
+                $sppLalu($nis),
+                ['nominal' => $nominal, 'metode' => 'transfer', 'tanggal_bayar' => now()->toDateString()],
+                $this->buktiContoh($santri->nama_lengkap, $nominal),
+                $santri->user,
+            );
+        }
+
+        KasTransaksi::create([
+            'gender' => Gender::Putra,
+            'tipe' => KasTipe::Keluar,
+            'kategori_kas_id' => KategoriKas::where('nama', 'Konsumsi')->value('id'),
+            'nominal' => 100000,
+            'tanggal' => now()->toDateString(),
+            'keterangan' => 'Beli gula dan teh untuk santri',
+            'created_by' => $bendaharaPutra->id,
+        ]);
+    }
+
+    /** Gambar bukti transfer sederhana untuk data demo. */
+    private function buktiContoh(string $nama, int $nominal): UploadedFile
+    {
+        $img = imagecreatetruecolor(600, 800);
+        imagefill($img, 0, 0, imagecolorallocate($img, 255, 255, 255));
+        $hijau = imagecolorallocate($img, 11, 107, 58);
+        $abu = imagecolorallocate($img, 90, 100, 95);
+        imagefilledrectangle($img, 0, 0, 600, 120, $hijau);
+        imagestring($img, 5, 30, 50, 'BUKTI TRANSFER (CONTOH DATA DEMO)', imagecolorallocate($img, 255, 255, 255));
+        foreach ([
+            'Tanggal  : '.now()->format('d/m/Y H:i'),
+            'Penerima : Pondok Pesantren As-Salafiyyah',
+            'Pengirim : '.$nama,
+            'Nominal  : Rp '.number_format($nominal, 0, ',', '.'),
+            'Status   : BERHASIL',
+        ] as $i => $baris) {
+            imagestring($img, 5, 30, 180 + $i * 50, $baris, $i === 3 ? $hijau : $abu);
+        }
+
+        $path = tempnam(sys_get_temp_dir(), 'bukti').'.png';
+        imagepng($img, $path);
+        imagedestroy($img);
+
+        return new UploadedFile($path, 'bukti-transfer.png', 'image/png', null, true);
     }
 
     private function pengurus(): void

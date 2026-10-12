@@ -106,6 +106,28 @@ class KeuanganTest extends TestCase
         $this->actingAs($bendahara)->postJson("/api/pembayaran/{$id}/setujui")->assertUnprocessable();
     }
 
+    public function test_santri_hanya_bisa_membayar_dan_melihat_tagihannya_sendiri(): void
+    {
+        $santri = Santri::factory()->create();
+        $lain = Santri::factory()->create();
+        $tagihanLain = $this->tagihan($lain);
+        $this->tagihan($santri);
+
+        $this->actingAs($santri->user)->getJson('/api/tagihan')->assertOk()->assertJsonCount(1, 'data');
+
+        $this->actingAs($santri->user)->postJson('/api/pembayaran', [
+            'tagihan_id' => $tagihanLain->id,
+            'nominal' => 1000,
+            'bukti' => UploadedFile::fake()->image('bukti.jpg'),
+        ])->assertNotFound();
+
+        // Santri wajib melampirkan bukti
+        $this->actingAs($santri->user)->postJson('/api/pembayaran', [
+            'tagihan_id' => $santri->tagihan()->first()->id,
+            'nominal' => 1000,
+        ])->assertJsonValidationErrors('bukti');
+    }
+
     public function test_pembayaran_ditolak_tidak_mengubah_kas(): void
     {
         $santri = Santri::factory()->create();
