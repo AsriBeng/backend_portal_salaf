@@ -22,6 +22,7 @@ class PengumumanResource extends JsonResource
                 'id' => $this->pembuat->id,
                 'name' => $this->pembuat->name,
                 'role' => $this->pembuat->role->label(),
+                'foto_url' => $this->pembuat->fotoUrl(),
             ]),
             'published_at' => $this->published_at,
         ];

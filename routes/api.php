@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\FotoPenggunaController;
 use App\Http\Controllers\Api\JenisTagihanController;
 use App\Http\Controllers\Api\KamarController;
 use App\Http\Controllers\Api\KartuController;
@@ -32,6 +33,13 @@ Route::get('/pondok', [SettingController::class, 'pondok']);
 */
 Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
+
+    // Foto profil pengurus: dilihat semua pengguna, diganti sendiri oleh pengurus
+    Route::get('/users/{user}/foto', [FotoPenggunaController::class, 'tampil'])->name('users.foto');
+    Route::middleware('role:admin,ketua,sekretaris,bendahara')->group(function () {
+        Route::post('/me/foto', [FotoPenggunaController::class, 'simpanSaya']);
+        Route::delete('/me/foto', [FotoPenggunaController::class, 'hapusSaya']);
+    });
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::put('/me/password', [AuthController::class, 'changePassword']);
     Route::post('/device-tokens', [AuthController::class, 'registerDevice']);
@@ -152,6 +160,8 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::middleware('role:admin')->group(function () {
         Route::apiResource('users', UserController::class);
         Route::post('/users/{user}/reset-password', [UserController::class, 'resetPassword']);
+        Route::post('/users/{user}/foto', [FotoPenggunaController::class, 'simpanUntuk']);
+        Route::delete('/users/{user}/foto', [FotoPenggunaController::class, 'hapusUntuk']);
 
         Route::get('/settings', [SettingController::class, 'index']);
         Route::post('/settings', [SettingController::class, 'update']); // POST agar bisa multipart (logo)

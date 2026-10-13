@@ -50,7 +50,7 @@ class DashboardController extends Controller
                 'status' => $santri->status->value,
                 'kamar' => $santri->kamar?->nama,
                 'komplek' => $santri->kamar?->komplek?->nama,
-                'foto_url' => $santri->foto_profil ? route('santri.dokumen', [$santri->id, 'foto_profil']) : null,
+                'foto_url' => $santri->fotoUrl(),
             ],
             'tagihan' => [
                 'jumlah_belum_lunas' => $belumLunas->count(),

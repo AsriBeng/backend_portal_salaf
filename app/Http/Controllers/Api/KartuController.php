@@ -67,7 +67,7 @@ class KartuController extends Controller
                     'tanggal_lahir' => $santri->tanggal_lahir->toDateString(),
                     'ttl' => $santri->tempat_lahir.', '.$santri->tanggal_lahir->translatedFormat('d F Y'),
                     'alamat' => $alamat,
-                    'foto_url' => $santri->foto_profil ? route('santri.dokumen', [$santri->id, 'foto_profil']) : null,
+                    'foto_url' => $santri->fotoUrl(),
                 ],
                 'status' => $santri->status->value,
                 'berlaku' => $santri->isAktif() ? 'Selama aktif sebagai santri' : 'Tidak berlaku',

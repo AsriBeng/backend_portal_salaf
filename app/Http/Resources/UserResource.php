@@ -21,6 +21,7 @@ class UserResource extends JsonResource
             'gender' => $this->gender?->value,
             'gender_label' => $this->gender?->label(),
             'phone' => $this->phone,
+            'foto_url' => $this->fotoUrl(),
             'is_active' => $this->is_active,
             'santri' => new SantriResource($this->whenLoaded('santri')),
             'created_at' => $this->created_at,

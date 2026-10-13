@@ -102,6 +102,14 @@ class Santri extends Model
         return $this->status === SantriStatus::Aktif;
     }
 
+    /** URL foto santri; parameter v berubah setiap foto diganti (mencegah foto lama dari cache). */
+    public function fotoUrl(): ?string
+    {
+        return $this->foto_profil
+            ? route('santri.dokumen', ['santri' => $this->id, 'jenis' => 'foto_profil', 'v' => substr(md5($this->foto_profil), 0, 8)])
+            : null;
+    }
+
     public function cardUrl(): string
     {
         return url('/kartu/'.$this->card_token);

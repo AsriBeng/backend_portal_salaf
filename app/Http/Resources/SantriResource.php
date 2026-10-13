@@ -30,7 +30,7 @@ class SantriResource extends JsonResource
             'tanggal_keluar' => $this->tanggal_keluar?->toDateString(),
             'kamar_id' => $this->kamar_id,
             'kamar' => new KamarResource($this->whenLoaded('kamar')),
-            'foto_url' => $this->foto_profil ? route('santri.dokumen', [$this->id, 'foto_profil']) : null,
+            'foto_url' => $this->fotoUrl(),
             'is_active' => $this->whenLoaded('user', fn () => $this->user->is_active),
 
             $this->mergeWhen($lengkap, fn () => [

@@ -50,6 +50,15 @@ class User extends Authenticatable
         return $this->hasMany(DeviceToken::class);
     }
 
+    /**
+     * URL foto profil pengurus. Parameter v berubah setiap foto diganti,
+     * supaya aplikasi tidak menampilkan foto lama dari cache.
+     */
+    public function fotoUrl(): ?string
+    {
+        return $this->foto ? route('users.foto', ['user' => $this->id, 'v' => substr(md5($this->foto), 0, 8)]) : null;
+    }
+
     public function hasRole(Role ...$roles): bool
     {
         return in_array($this->role, $roles, true);
