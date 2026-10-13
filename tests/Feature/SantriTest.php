@@ -164,10 +164,29 @@ class SantriTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.qr_url', url('/kartu/'.$santri->card_token));
 
-        $this->get('/kartu/'.$santri->card_token)->assertOk()->assertSee('KARTU ASLI')->assertSee('Ahmad Fauzi');
+        $this->get('/kartu/'.$santri->card_token)->assertOk()->assertSee('SANTRI AKTIF', false)->assertSee('Ahmad Fauzi');
 
-        $santri->update(['status' => 'lulus']);
-        $this->get('/kartu/'.$santri->card_token)->assertOk()->assertSee('KARTU TIDAK BERLAKU');
+        // Lulus / keluar: kartu tetap asli, dengan keterangan status dan data lengkap
+        $santri->update(['status' => 'lulus', 'tanggal_keluar' => '2026-06-20']);
+        $this->get('/kartu/'.$santri->card_token)
+            ->assertOk()
+            ->assertSee('KARTU ASLI', false)
+            ->assertSee('SANTRI TELAH LULUS', false)
+            ->assertSee('20 Juni 2026')
+            ->assertSee('Tempat, tanggal lahir')
+            ->assertDontSee('TIDAK BERLAKU');
+
+        $santri->update(['status' => 'keluar']);
+        $this->get('/kartu/'.$santri->card_token)->assertOk()->assertSee('KARTU ASLI', false)->assertSee('SANTRI SUDAH KELUAR', false);
+
+        $this->actingAs($santri->user->fresh())->getJson('/api/kartu-saya')
+            ->assertJsonPath('data.status', 'keluar')
+            ->assertJsonPath('data.tanggal_keluar', '2026-06-20');
+
+        // Data santri yang dihapus dari sistem dianggap tidak terdaftar
+        $token = $santri->card_token;
+        $santri->delete();
+        $this->get('/kartu/'.$token)->assertOk()->assertSee('KARTU TIDAK DITEMUKAN');
 
         $this->get('/kartu/kodeasal')->assertOk()->assertSee('KARTU TIDAK DITEMUKAN');
     }

@@ -71,6 +71,8 @@ class KartuController extends Controller
                 ],
                 'status' => $santri->status->value,
                 'berlaku' => $santri->isAktif() ? 'Selama aktif sebagai santri' : 'Tidak berlaku',
+                // Tanggal lulus / keluar, untuk keterangan di bawah kartu
+                'tanggal_keluar' => $santri->tanggal_keluar?->toDateString(),
                 'qr_url' => $santri->cardUrl(),
             ],
         ]);

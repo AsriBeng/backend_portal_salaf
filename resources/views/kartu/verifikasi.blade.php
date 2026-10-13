@@ -29,7 +29,22 @@
     .status.invalid { background: var(--oranye-muda); }
     .status.invalid .ikon { background: var(--oranye); color: #fff; }
     .status.invalid strong { color: var(--oranye); }
+    .status.lulus { background: #e8eefd; }
+    .status.lulus .ikon { background: #1d4ed8; color: #fff; }
+    .status.lulus strong { color: #1d4ed8; }
     .status.notfound { background: var(--merah-muda); }
+
+    .keterangan-status {
+        display: inline-block;
+        margin-top: 6px;
+        padding: 3px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+    .keterangan-status.aktif { background: var(--hijau-muda); color: var(--hijau); }
+    .keterangan-status.lulus { background: #e8eefd; color: #1d4ed8; }
+    .keterangan-status.keluar { background: var(--oranye-muda); color: var(--oranye); }
     .status.notfound .ikon { background: var(--merah); color: #fff; }
     .status.notfound strong { color: var(--merah); }
 
@@ -77,20 +92,42 @@
                     <span>Kode kartu tidak terdaftar di sistem pondok. Kartu ini kemungkinan tidak asli.</span>
                 </div>
             </div>
-        @elseif ($valid)
-            <div class="status valid">
-                <div class="ikon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></div>
-                <div>
-                    <strong>KARTU ASLI &ndash; SANTRI AKTIF</strong>
-                    <span>Kartu terdaftar resmi dan santri masih aktif di pondok.</span>
-                </div>
-            </div>
         @else
-            <div class="status invalid">
-                <div class="ikon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 8v5M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg></div>
+            {{-- Kartu terdaftar = kartu asli. Statusnya: aktif, lulus, atau keluar. --}}
+            @php
+                $status = $santri->status->value;
+                $tanggalKeluar = $santri->tanggal_keluar?->translatedFormat('d F Y');
+                [$kelas, $judul, $keterangan] = match ($status) {
+                    'lulus' => [
+                        'lulus',
+                        'KARTU ASLI &ndash; SANTRI TELAH LULUS',
+                        'Kartu terdaftar resmi. Pemilik kartu adalah alumni yang telah lulus dari pondok'.($tanggalKeluar ? " pada {$tanggalKeluar}" : '').'.',
+                    ],
+                    'keluar' => [
+                        'invalid',
+                        'KARTU ASLI &ndash; SANTRI SUDAH KELUAR',
+                        'Kartu terdaftar resmi, tetapi pemilik kartu sudah keluar dari pondok'.($tanggalKeluar ? " sejak {$tanggalKeluar}" : '').' dan bukan lagi santri aktif.',
+                    ],
+                    default => [
+                        'valid',
+                        'KARTU ASLI &ndash; SANTRI AKTIF',
+                        'Kartu terdaftar resmi dan santri masih aktif di pondok.',
+                    ],
+                };
+            @endphp
+            <div class="status {{ $kelas }}">
+                <div class="ikon">
+                    @if ($status === 'keluar')
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 8v5M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg>
+                    @elseif ($status === 'lulus')
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg>
+                    @else
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                    @endif
+                </div>
                 <div>
-                    <strong>KARTU TIDAK BERLAKU</strong>
-                    <span>Kartu pernah terdaftar, tetapi santri sudah tidak aktif di pondok.</span>
+                    <strong>{!! $judul !!}</strong>
+                    <span>{{ $keterangan }}</span>
                 </div>
             </div>
         @endif
@@ -98,7 +135,7 @@
         <div class="card-body">
             @if ($santri)
                 <div class="profil">
-                    @if ($santri->foto_profil && $valid)
+                    @if ($santri->foto_profil)
                         <img class="foto" src="{{ url('/kartu/'.$token.'/foto') }}" alt="Foto {{ $santri->nama_lengkap }}">
                     @else
                         <div class="foto" aria-hidden="true">
@@ -110,12 +147,16 @@
                         <dd>{{ $santri->nama_lengkap }}</dd>
                         <dt>NIS</dt>
                         <dd>{{ $santri->nis }}</dd>
-                        @if ($valid)
-                            <dt>Tempat, tanggal lahir</dt>
-                            <dd>{{ $santri->tempat_lahir }}, {{ $santri->tanggal_lahir->translatedFormat('d F Y') }}</dd>
-                            <dt>Asal</dt>
-                            <dd>{{ $santri->kabupaten }}, {{ $santri->provinsi }}</dd>
-                        @endif
+                        <dt>Tempat, tanggal lahir</dt>
+                        <dd>{{ $santri->tempat_lahir }}, {{ $santri->tanggal_lahir->translatedFormat('d F Y') }}</dd>
+                        <dt>Asal</dt>
+                        <dd>{{ $santri->kabupaten }}, {{ $santri->provinsi }}</dd>
+                        <dt>Status</dt>
+                        <dd>
+                            <span class="keterangan-status {{ $santri->status->value }}">
+                                {{ match ($santri->status->value) { 'lulus' => 'Alumni / Lulus', 'keluar' => 'Sudah keluar', default => 'Santri aktif' } }}
+                            </span>
+                        </dd>
                     </dl>
                 </div>
             @else

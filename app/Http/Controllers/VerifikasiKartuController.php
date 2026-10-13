@@ -17,11 +17,12 @@ class VerifikasiKartuController extends Controller
 {
     public function show(string $token): View
     {
-        $santri = Santri::withTrashed()->with('kamar.komplek')->where('card_token', $token)->first();
+        // Kartu terdaftar = asli, apa pun statusnya (aktif / lulus / keluar).
+        // Data santri yang sudah dihapus dari sistem dianggap tidak terdaftar.
+        $santri = Santri::with('kamar.komplek')->where('card_token', $token)->first();
 
         return view('kartu.verifikasi', [
             'santri' => $santri,
-            'valid' => $santri && ! $santri->trashed() && $santri->isAktif(),
             'pondok' => Setting::values(),
             'token' => $token,
         ]);
