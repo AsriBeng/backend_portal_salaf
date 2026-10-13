@@ -15,6 +15,9 @@ use RuntimeException;
  */
 class FcmService
 {
+    /** Harus sama dengan ID saluran notifikasi yang dibuat di aplikasi Android (MainActivity.kt). */
+    public const CHANNEL_ANDROID = 'portal_salaf_penting';
+
     public function enabled(): bool
     {
         $path = $this->credentialsPath();
@@ -37,21 +40,42 @@ class FcmService
         $accessToken = $this->accessToken($credentials);
 
         foreach ($tokens as $token) {
-            $response = Http::withToken($accessToken)->post($url, [
+            $response = Http::timeout(15)->withToken($accessToken)->post($url, [
                 'message' => [
                     'token' => $token,
                     'notification' => ['title' => $title, 'body' => $body],
                     'data' => array_map('strval', $data),
-                    'android' => ['priority' => 'high'],
-                    'apns' => ['payload' => ['aps' => ['sound' => 'default']]],
+                    'android' => [
+                        // Prioritas tinggi: dikirim segera meskipun HP sedang mode hemat daya (Doze)
+                        'priority' => 'high',
+                        'ttl' => '86400s',
+                        'notification' => [
+                            // Saluran berprioritas tinggi yang dibuat aplikasi (MainActivity.kt)
+                            'channel_id' => self::CHANNEL_ANDROID,
+                            'notification_priority' => 'PRIORITY_HIGH',
+                            'default_sound' => true,
+                            'default_vibrate_timings' => true,
+                            'visibility' => 'PUBLIC',
+                        ],
+                    ],
+                    'apns' => [
+                        'headers' => ['apns-priority' => '10'],
+                        'payload' => ['aps' => ['sound' => 'default']],
+                    ],
                 ],
             ]);
+
+            $ujungToken = substr($token, -8);
 
             if ($response->status() === 404 || str_contains($response->body(), 'UNREGISTERED')) {
                 // Token sudah tidak berlaku (aplikasi dihapus / logout)
                 DeviceToken::where('token', $token)->delete();
+                Log::info("FCM: token …{$ujungToken} tidak berlaku, dihapus");
             } elseif ($response->failed()) {
-                Log::warning('FCM gagal mengirim notifikasi', ['status' => $response->status(), 'body' => $response->body()]);
+                Log::warning('FCM gagal mengirim notifikasi', ['token' => "…{$ujungToken}", 'status' => $response->status(), 'body' => $response->body()]);
+            } else {
+                // Dicatat supaya waktu kirim di server bisa dibandingkan dengan waktu muncul di HP
+                Log::info("FCM terkirim ke …{$ujungToken}: {$title}");
             }
         }
     }
