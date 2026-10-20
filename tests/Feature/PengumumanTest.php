@@ -56,6 +56,28 @@ class PengumumanTest extends TestCase
         ])->assertForbidden();
     }
 
+    public function test_bendahara_bisa_membuat_dan_mengubah_pengumuman_bagiannya(): void
+    {
+        Notification::fake();
+        $bendaharaPutri = User::factory()->pengurus(Role::Bendahara, Gender::Putri)->create();
+        $santriPutri = Santri::factory()->putri()->create();
+        $santriPutra = Santri::factory()->create();
+
+        $this->actingAs($bendaharaPutri)->postJson('/api/pengumuman', [
+            'judul' => 'Iuran', 'isi' => 'Iuran bulanan', 'target' => 'putra',
+        ])->assertUnprocessable()->assertJsonValidationErrors('target');
+
+        $id = $this->actingAs($bendaharaPutri)->postJson('/api/pengumuman', [
+            'judul' => 'Iuran', 'isi' => 'Iuran bulanan dibayar paling lambat tanggal 10', 'target' => 'putri',
+        ])->assertCreated()->json('data.id');
+
+        Notification::assertSentTo($santriPutri->user, PengumumanBaru::class);
+        Notification::assertNotSentTo($santriPutra->user, PengumumanBaru::class);
+
+        $this->actingAs($bendaharaPutri)->postJson("/api/pengumuman/{$id}", ['judul' => 'Iuran bulanan'])->assertOk();
+        $this->actingAs($bendaharaPutri)->deleteJson("/api/pengumuman/{$id}")->assertOk();
+    }
+
     public function test_dashboard_sesuai_peran(): void
     {
         $santri = Santri::factory()->create();

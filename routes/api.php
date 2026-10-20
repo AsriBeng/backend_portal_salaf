@@ -50,11 +50,11 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::post('/notifikasi/baca-semua', [NotifikasiController::class, 'bacaSemua']);
     Route::post('/notifikasi/{id}/baca', [NotifikasiController::class, 'baca']);
 
-    // Pengumuman: semua bisa melihat; admin, ketua, sekretaris bisa membuat
+    // Pengumuman: semua bisa melihat; admin, ketua, sekretaris, bendahara bisa membuat
     Route::get('/pengumuman', [PengumumanController::class, 'index']);
     Route::get('/pengumuman/{pengumuman}', [PengumumanController::class, 'show']);
     Route::get('/pengumuman/{pengumuman}/lampiran', [PengumumanController::class, 'lampiran'])->name('pengumuman.lampiran');
-    Route::middleware('role:admin,ketua,sekretaris')->group(function () {
+    Route::middleware('role:admin,ketua,sekretaris,bendahara')->group(function () {
         Route::post('/pengumuman', [PengumumanController::class, 'store']);
         Route::post('/pengumuman/{pengumuman}', [PengumumanController::class, 'update']); // POST agar bisa multipart
         Route::delete('/pengumuman/{pengumuman}', [PengumumanController::class, 'destroy']);
