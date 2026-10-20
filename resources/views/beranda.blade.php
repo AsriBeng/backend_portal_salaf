@@ -1,7 +1,7 @@
 @extends('layouts.publik')
 
-@section('title', 'Verifikasi Kartu Santri')
-@section('label', 'Verifikasi Kartu Santri')
+@section('title', 'Selamat Datang di Portal Salaf')
+@section('label', 'Portal Salaf')
 
 @push('styles')
 <style>
@@ -41,6 +41,30 @@
     }
     .catatan svg { width: 20px; height: 20px; flex-shrink: 0; margin-top: 2px; }
 
+    .sambutan { text-align: center; }
+    .sambutan .ikon-besar { margin: 0 auto 16px; }
+    .sambutan p { margin-bottom: 20px; }
+    .fitur { list-style: none; padding: 0; margin: 0 0 22px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+    .fitur li {
+        font-size: 13px; font-weight: 600;
+        color: var(--hijau);
+        background: var(--hijau-muda);
+        padding: 5px 12px;
+        border-radius: 999px;
+    }
+    .pasang {
+        margin-top: 16px;
+        font-size: 13px;
+        color: var(--teks-2);
+        text-align: left;
+        border-top: 1px dashed var(--garis);
+        padding-top: 14px;
+    }
+    .pasang summary { cursor: pointer; font-weight: 700; color: var(--hijau); list-style: none; text-align: center; }
+    .pasang summary::-webkit-details-marker { display: none; }
+    .pasang ol { margin: 10px 0 0; padding-left: 20px; }
+    .pasang li + li { margin-top: 4px; }
+
     .web { text-align: center; }
     .web h2 { margin-bottom: 4px; }
     .web p { margin-bottom: 18px; }
@@ -48,6 +72,39 @@
 @endpush
 
 @section('content')
+    <section class="card sambutan">
+        <div class="card-body">
+            <div class="ikon-besar" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+            </div>
+            <h2>Selamat Datang di Portal Salaf</h2>
+            <p>
+                Portal santri {{ $pondok['nama_pondok'] }} untuk santri, wali santri, dan pengurus.
+                Bisa dibuka langsung dari browser di HP Android, iPhone, maupun komputer.
+            </p>
+
+            <ul class="fitur">
+                <li>Data Santri</li>
+                <li>Kartu Santri</li>
+                <li>Tagihan &amp; Pembayaran</li>
+                <li>Pengumuman</li>
+            </ul>
+
+            <a class="btn btn-emas" href="{{ url('/') }}/app/">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="m10 17 5-5-5-5"/><path d="M15 12H3"/></svg>
+                Masuk Portal Salaf
+            </a>
+
+            <details class="pasang">
+                <summary>Pasang di layar utama HP</summary>
+                <ol>
+                    <li><strong>iPhone (Safari):</strong> buka Portal Salaf, ketuk tombol Bagikan, lalu pilih <em>Tambahkan ke Layar Utama</em>.</li>
+                    <li><strong>Android (Chrome):</strong> buka Portal Salaf, ketuk menu titik tiga, lalu pilih <em>Tambahkan ke layar utama</em>.</li>
+                </ol>
+            </details>
+        </div>
+    </section>
+
     <section class="card">
         <div class="card-body">
             <div class="ikon-besar" aria-hidden="true">
@@ -95,7 +152,7 @@
         <div class="card-body">
             <h2>Website Resmi Pondok</h2>
             <p>Informasi lengkap tentang {{ $pondok['nama_pondok'] }} dapat diakses melalui website resmi.</p>
-            <a class="btn btn-emas" href="{{ $pondok['website_pondok'] }}" target="_blank" rel="noopener">
+            <a class="btn btn-garis" href="{{ $pondok['website_pondok'] }}" target="_blank" rel="noopener">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                 Kunjungi {{ preg_replace('#^https?://#', '', rtrim($pondok['website_pondok'], '/')) }}
             </a>
