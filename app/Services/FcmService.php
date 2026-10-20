@@ -38,6 +38,7 @@ class FcmService
         $credentials = $this->credentials();
         $url = "https://fcm.googleapis.com/v1/projects/{$credentials['project_id']}/messages:send";
         $accessToken = $this->accessToken($credentials);
+        $webpush = $this->webpush($data);
 
         foreach ($tokens as $token) {
             $response = Http::timeout(15)->withToken($accessToken)->post($url, [
@@ -62,6 +63,7 @@ class FcmService
                         'headers' => ['apns-priority' => '10'],
                         'payload' => ['aps' => ['sound' => 'default']],
                     ],
+                    'webpush' => $webpush,
                 ],
             ]);
 
@@ -78,6 +80,37 @@ class FcmService
                 Log::info("FCM terkirim ke …{$ujungToken}: {$title}");
             }
         }
+    }
+
+    /**
+     * Pengaturan untuk browser (Portal Salaf versi web): ikon, dan halaman yang dibuka saat notifikasi diklik.
+     *
+     * @param  array<string, string>  $data
+     * @return array<string, mixed>
+     */
+    private function webpush(array $data): array
+    {
+        $refId = $data['ref_id'] ?? '';
+        // Sama dengan PushService._buka() di aplikasi
+        $halaman = $refId === '' ? 'notifikasi' : match ($data['tipe'] ?? null) {
+            'pengumuman' => "pengumuman/{$refId}",
+            'tagihan' => "tagihan/{$refId}",
+            'pembayaran' => "pembayaran/{$refId}",
+            default => 'notifikasi',
+        };
+
+        $webpush = [
+            'headers' => ['Urgency' => 'high', 'TTL' => '86400'],
+            'notification' => ['icon' => url('/app/icons/Icon-192.png')],
+        ];
+
+        // FCM hanya menerima tautan https (server lokal http dilewati)
+        $link = url("/app/{$halaman}");
+        if (str_starts_with($link, 'https://')) {
+            $webpush['fcm_options'] = ['link' => $link];
+        }
+
+        return $webpush;
     }
 
     private function credentialsPath(): ?string

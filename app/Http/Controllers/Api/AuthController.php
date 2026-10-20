@@ -84,7 +84,7 @@ class AuthController extends Controller
     {
         $data = $request->validate([
             'token' => ['required', 'string', 'max:255'],
-            'platform' => ['required', 'in:android,ios'],
+            'platform' => ['required', 'in:android,ios,web'],
         ]);
 
         DeviceToken::updateOrCreate(
