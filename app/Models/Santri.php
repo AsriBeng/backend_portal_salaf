@@ -97,6 +97,11 @@ class Santri extends Model
         return $this->hasMany(Tagihan::class);
     }
 
+    public function keringananSpp(): HasMany
+    {
+        return $this->hasMany(KeringananSpp::class);
+    }
+
     public function isAktif(): bool
     {
         return $this->status === SantriStatus::Aktif;

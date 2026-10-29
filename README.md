@@ -277,6 +277,8 @@ Authorization: Bearer {token}
 | `POST` | `/tagihan` | admin, bendahara | Iuran: `jenis_tagihan_id`, `judul?`, `nominal?`, `gender?`, `santri_ids?` |
 | `POST` | `/tagihan/generate-spp` | admin, bendahara | `periode?`, aman diulang |
 | `PUT` `DELETE` | `/tagihan/{id}` | admin, bendahara | Hapus hanya jika belum ada pembayaran |
+| `GET` `POST` | `/santri/{id}/keringanan-spp` | lihat: + ketua | Keringanan SPP: `nominal` (0 = bebas), `mulai` & `sampai?` (YYYY-MM), `keterangan?`. Tagihan SPP terbit yang belum dibayar ikut disesuaikan |
+| `PUT` `DELETE` | `/keringanan-spp/{id}` | admin, bendahara | sda |
 | `GET` | `/pembayaran` · `/pembayaran/{id}` | admin, ketua, bendahara, santri | `?status=menunggu` |
 | `GET` | `/pembayaran/{id}/bukti` | sda | Unduh bukti |
 | `POST` | `/pembayaran` | santri, admin, bendahara | Santri: `tagihan_id`, `nominal`, `bukti`. Bendahara: + `metode` |
