@@ -78,6 +78,41 @@ class PengumumanTest extends TestCase
         $this->actingAs($bendaharaPutri)->deleteJson("/api/pengumuman/{$id}")->assertOk();
     }
 
+    public function test_pengumuman_alumni_hanya_untuk_santri_lulus_atau_keluar(): void
+    {
+        Notification::fake();
+        $admin = User::factory()->admin()->create();
+        $ketuaPutra = User::factory()->pengurus(Role::Ketua, Gender::Putra)->create();
+        $aktif = Santri::factory()->create();
+        $lulus = Santri::factory()->create(['status' => 'lulus']);
+        $keluar = Santri::factory()->putri()->create(['status' => 'keluar']);
+
+        foreach (['alumni', 'putra', 'semua'] as $target) {
+            $this->actingAs($admin)->postJson('/api/pengumuman', [
+                'judul' => "Untuk {$target}", 'isi' => 'Isi', 'target' => $target,
+            ])->assertCreated();
+        }
+
+        $judul = fn (User $u) => collect($this->actingAs($u)->getJson('/api/pengumuman')->assertOk()->json('data'))
+            ->pluck('judul')->sort()->values()->all();
+
+        $this->assertSame(['Untuk putra', 'Untuk semua'], $judul($aktif->user));
+        $this->assertSame(['Untuk alumni', 'Untuk semua'], $judul($lulus->user));
+        $this->assertSame(['Untuk alumni', 'Untuk semua'], $judul($keluar->user));
+        $this->assertSame(['Untuk alumni', 'Untuk putra', 'Untuk semua'], $judul($ketuaPutra));
+
+        // alumni putra tidak lagi menerima pengumuman untuk santri putra aktif
+        Notification::assertSentToTimes($lulus->user, PengumumanBaru::class, 2);
+        Notification::assertSentToTimes($keluar->user, PengumumanBaru::class, 2);
+        Notification::assertSentToTimes($aktif->user, PengumumanBaru::class, 2);
+        Notification::assertSentToTimes($ketuaPutra, PengumumanBaru::class, 2);
+
+        // pengurus putri juga boleh menargetkan alumni
+        $this->actingAs(User::factory()->pengurus(Role::Sekretaris, Gender::Putri)->create())->postJson('/api/pengumuman', [
+            'judul' => 'Reuni', 'isi' => 'Reuni alumni', 'target' => 'alumni',
+        ])->assertCreated();
+    }
+
     public function test_dashboard_sesuai_peran(): void
     {
         $santri = Santri::factory()->create();

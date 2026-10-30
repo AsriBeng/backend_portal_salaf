@@ -8,7 +8,6 @@ use App\Http\Controllers\Api\KamarController;
 use App\Http\Controllers\Api\KartuController;
 use App\Http\Controllers\Api\KasController;
 use App\Http\Controllers\Api\KategoriKasController;
-use App\Http\Controllers\Api\KeringananSppController;
 use App\Http\Controllers\Api\KomplekController;
 use App\Http\Controllers\Api\LaporanController;
 use App\Http\Controllers\Api\NotifikasiController;
@@ -16,6 +15,7 @@ use App\Http\Controllers\Api\PembayaranController;
 use App\Http\Controllers\Api\PengumumanController;
 use App\Http\Controllers\Api\SantriController;
 use App\Http\Controllers\Api\SettingController;
+use App\Http\Controllers\Api\SppKhususController;
 use App\Http\Controllers\Api\TagihanController;
 use App\Http\Controllers\Api\UserController;
 use App\Models\KasTransaksi;
@@ -132,7 +132,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::get('/kas/{kas}/bukti', [KasController::class, 'bukti'])->name('kas.bukti');
         Route::get('/laporan/keuangan', [LaporanController::class, 'keuangan']);
         Route::get('/laporan/tunggakan', [LaporanController::class, 'tunggakan']);
-        Route::get('/santri/{santri}/keringanan-spp', [KeringananSppController::class, 'index']);
+        Route::get('/spp-khusus', [SppKhususController::class, 'index']);
     });
 
     Route::middleware('role:admin,bendahara')->group(function () {
@@ -145,9 +145,9 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::put('/tagihan/{tagihan}', [TagihanController::class, 'update']);
         Route::delete('/tagihan/{tagihan}', [TagihanController::class, 'destroy']);
 
-        Route::post('/santri/{santri}/keringanan-spp', [KeringananSppController::class, 'store']);
-        Route::put('/keringanan-spp/{keringananSpp}', [KeringananSppController::class, 'update']);
-        Route::delete('/keringanan-spp/{keringananSpp}', [KeringananSppController::class, 'destroy']);
+        Route::post('/spp-khusus', [SppKhususController::class, 'store']);
+        Route::put('/spp-khusus/{sppKhusus}', [SppKhususController::class, 'update']);
+        Route::delete('/spp-khusus/{sppKhusus}', [SppKhususController::class, 'destroy']);
 
         Route::post('/pembayaran/{pembayaran}/setujui', [PembayaranController::class, 'setujui']);
         Route::post('/pembayaran/{pembayaran}/tolak', [PembayaranController::class, 'tolak']);

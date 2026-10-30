@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\PengumumanTarget;
 use App\Enums\Role;
+use App\Enums\SantriStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PengumumanResource;
 use App\Models\Pengumuman;
@@ -40,7 +41,7 @@ class PengumumanController extends Controller
         return new PengumumanResource($pengumuman->load('pembuat'));
     }
 
-    /** Pengurus putra hanya bisa menargetkan "semua" atau "putra"; putri sebaliknya. Admin bebas. */
+    /** Pengurus putra hanya bisa menargetkan "semua", "putra", atau "alumni"; putri sebaliknya. Admin bebas. */
     public function store(Request $request): JsonResponse
     {
         $data = $this->validated($request);
@@ -137,16 +138,25 @@ class PengumumanController extends Controller
         abort_unless($user->isAdmin() || $pengumuman->created_by === $user->id, 403, 'Hanya pembuat atau admin yang dapat mengubah pengumuman ini.');
     }
 
-    /** Semua pengguna aktif yang berhak melihat pengumuman, kecuali pembuatnya. */
+    /**
+     * Pengguna aktif yang dituju pengumuman, kecuali pembuatnya. Putra/putri: admin, pengurus, dan santri aktif
+     * sesuai jenis kelamin. Alumni: admin dan santri yang sudah lulus/keluar.
+     */
     private function penerima(Pengumuman $pengumuman, User $pembuat)
     {
         $gender = $pengumuman->target->gender();
+        $santriAktif = fn ($q) => $q->where('status', SantriStatus::Aktif);
 
         return User::where('is_active', true)
             ->whereKeyNot($pembuat->id)
             ->when($gender, fn ($q) => $q->where(fn ($q) => $q
                 ->where('role', Role::Admin)
-                ->orWhere('gender', $gender->value)))
+                ->orWhere(fn ($q) => $q
+                    ->where('gender', $gender->value)
+                    ->where(fn ($q) => $q->where('role', '!=', Role::Santri)->orWhereHas('santri', $santriAktif)))))
+            ->when($pengumuman->target === PengumumanTarget::Alumni, fn ($q) => $q->where(fn ($q) => $q
+                ->where('role', Role::Admin)
+                ->orWhereHas('santri', fn ($q) => $q->where('status', '!=', SantriStatus::Aktif))))
             ->get();
     }
 }

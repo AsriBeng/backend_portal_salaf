@@ -21,7 +21,7 @@ class TagihanService
     /**
      * Buat tagihan SPP bulan tertentu untuk semua santri aktif.
      * Aman dijalankan berulang: tagihan yang sudah ada tidak dibuat dobel.
-     * Santri dengan keringanan memakai nominal keringanannya; keringanan 0 = tidak ditagih.
+     * Santri yang masuk SPP khusus memakai nominal SPP khususnya; nominal 0 = tidak ditagih.
      *
      * @return int jumlah tagihan baru
      */
@@ -40,10 +40,10 @@ class TagihanService
                 ->whereDoesntHave('tagihan', fn ($q) => $q
                     ->where('jenis_tagihan_id', $jenis->id)
                     ->whereDate('periode', $periode))
-                ->with(['user', 'keringananSpp' => fn ($q) => $q->berlakuPada($periode)])
+                ->with(['user', 'sppKhusus' => fn ($q) => $q->berlakuPada($periode)])
                 ->chunkById(200, function ($daftarSantri) use ($jenis, $periode, $jatuhTempo, &$dibuat) {
                     foreach ($daftarSantri as $santri) {
-                        $nominal = $santri->keringananSpp->first()->nominal ?? $jenis->nominal;
+                        $nominal = $santri->sppKhusus->first()->nominal ?? $jenis->nominal;
                         if ($nominal <= 0) {
                             continue;
                         }
@@ -68,7 +68,7 @@ class TagihanService
 
     /**
      * Samakan nominal tagihan SPP santri yang sudah terbit pada rentang bulan tertentu dengan
-     * keringanan yang berlaku (atau nominal SPP normal jika tidak ada keringanan).
+     * SPP khusus yang berlaku (atau nominal SPP normal jika santri tidak masuk SPP khusus).
      * Tagihan lunas, yang masih punya pembayaran menunggu verifikasi, atau yang sudah dibayar
      * melebihi nominal baru dibiarkan. Nominal 0 menghapus tagihan yang belum pernah dibayar.
      *
@@ -88,7 +88,7 @@ class TagihanService
         $diubah = 0;
 
         foreach ($daftarTagihan as $tagihan) {
-            $nominal = $santri->keringananSpp()->berlakuPada($tagihan->periode)->value('nominal');
+            $nominal = $santri->sppKhusus()->berlakuPada($tagihan->periode)->value('spp_khusus.nominal');
             $nominal = $nominal === null ? $tagihan->jenisTagihan->nominal : (int) $nominal;
 
             if ($nominal === $tagihan->nominal || $nominal < $tagihan->terbayar) {

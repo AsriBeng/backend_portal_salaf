@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
@@ -97,9 +98,9 @@ class Santri extends Model
         return $this->hasMany(Tagihan::class);
     }
 
-    public function keringananSpp(): HasMany
+    public function sppKhusus(): BelongsToMany
     {
-        return $this->hasMany(KeringananSpp::class);
+        return $this->belongsToMany(SppKhusus::class, 'spp_khusus_santri');
     }
 
     public function isAktif(): bool

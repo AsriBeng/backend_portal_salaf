@@ -26,13 +26,24 @@ class Pengumuman extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    /** Pengumuman "semua" + pengumuman untuk jenis kelamin pengguna. Admin melihat semuanya. */
+    /**
+     * Admin melihat semuanya. Santri aktif: "semua" + jenis kelaminnya. Alumni (santri lulus/keluar):
+     * "semua" + "alumni". Pengurus: "semua" + jenis kelaminnya + "alumni".
+     */
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
         $gender = $user->genderScope();
 
-        return $gender === null
-            ? $query
-            : $query->whereIn('target', [PengumumanTarget::Semua->value, $gender->target()]);
+        if ($gender === null) {
+            return $query;
+        }
+
+        $target = match (true) {
+            ! $user->isSantri() => [$gender->target(), PengumumanTarget::Alumni->value],
+            $user->santri?->isAktif() ?? false => [$gender->target()],
+            default => [PengumumanTarget::Alumni->value],
+        };
+
+        return $query->whereIn('target', [PengumumanTarget::Semua->value, ...$target]);
     }
 }
