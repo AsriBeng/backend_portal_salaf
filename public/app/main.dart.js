@@ -41095,12 +41095,12 @@ _.c=c
 _.d=d},
 ay5:function ay5(a){this.a=a},
 ay6:function ay6(a){this.a=a},
-ay1:function ay1(a,b,c){this.a=a
-this.b=b
-this.c=c},
+ay1:function ay1(a){this.a=a},
 ay2:function ay2(a){this.a=a},
 ay3:function ay3(a){this.a=a},
-ay4:function ay4(a){this.a=a},
+ay4:function ay4(a,b,c){this.a=a
+this.b=b
+this.c=c},
 ayb:function ayb(a,b){this.a=a
 this.b=b},
 ayc:function ayc(a,b,c){this.a=a
@@ -151009,27 +151009,25 @@ aJs(a,b,c){var s,r,q,p,o,n,m,l=null,k=new A.ay5(b),j=new A.ay6(k),i=t.P,h=i.a(c.
 if(e==null)e=0
 s=A.hR(h.h(0,"jumlah_belum_lunas"))
 if(s==null)s=0
-r=A.eB(h.h(0,"total_belum_lunas"))
-if(r==null)r=0
-q=t.p
-r=A.b([B.AY,B.aH,new A.aqg(r,s,e,j,l)],q)
-if(!f.ga3(f)){p=A.b([],q)
+r=A.b([new A.li(B.B9,"Buku Saku",B.h2,new A.ay1(a)),new A.li(B.B5,"ID Card",B.V,new A.ay2(k)),new A.li(B.mh,"Tagihan",B.cr,j),new A.li(B.Bb,"Profil",B.ey,new A.ay3(k))],t.Nz)
+q=A.eB(h.h(0,"total_belum_lunas"))
+if(q==null)q=0
+p=t.p
+q=A.b([B.AY,B.aH,new A.Wh(r,l),B.aH,new A.aqg(q,s,e,j,l)],p)
+if(!f.ga3(f)){r=A.b([],p)
 for(o=f.$ti,n=new A.aR(f,f.gu(0),o.i("aR<aF.E>")),o=o.i("aF.E");n.q();){m=n.d
 if(m==null)m=o.a(m)
-p.push(new A.aqi(m,new A.ay1(a,m,b),l))}B.m.O(r,A.b([B.aH,new A.fO("Tagihan belum lunas",l,A.ax(p,B.P,B.A,B.C),B.agR,l)],q))}r.push(B.aH)
-r.push(new A.Wh(A.b([new A.li(B.B9,"Buku Saku",B.h2,new A.ay2(a)),new A.li(B.B5,"ID Card",B.V,new A.ay3(k)),new A.li(B.mh,"Tagihan",B.cr,j),new A.li(B.Bb,"Profil",B.ey,new A.ay4(k))],t.Nz),l))
-r.push(B.aH)
-r.push(new A.WT(J.kD(g.a(c.h(0,"pengumuman_terbaru")),i),l))
-return r},
-aKg(a,b,c){var s=c.d,r=new A.ayb(A.bIz(s),b),q=t.Nz,p=A.b([],q),o=r.$4(B.xs,B.pn,"Santri",B.V)
+r.push(new A.aqi(m,new A.ay4(a,m,b),l))}B.m.O(q,A.b([B.aH,new A.fO("Tagihan belum lunas",l,A.ax(r,B.P,B.A,B.C),B.agR,l)],p))}q.push(B.aH)
+q.push(new A.WT(J.kD(g.a(c.h(0,"pengumuman_terbaru")),i),l))
+return q},
+aKg(a,b,c){var s=c.d,r=new A.ayb(A.bIz(s),b),q=t.Nz,p=A.b([new A.li(B.B9,"Buku Saku",B.h2,new A.ay7(a))],q),o=r.$4(B.xs,B.pn,"Santri",B.V)
 if(o!=null)p.push(o)
 o=r.$4(B.D_,B.B8,"Kamar",B.cr)
 if(o!=null)p.push(o)
 o=r.$4(B.D0,B.B4,"Keuangan",B.ey)
 if(o!=null)p.push(o)
-p.push(new A.li(B.pm,"Pengumuman",B.H2,new A.ay7(a)))
-if(s===B.aT)B.m.O(p,A.b([new A.li(B.aj5,"Pengurus",B.V,new A.ay8(a)),new A.li(B.ajl,"Pengaturan",B.X,new A.ay9(a))],q))
-p.push(new A.li(B.B9,"Buku Saku",B.h2,new A.aya(a)))
+p.push(new A.li(B.pm,"Pengumuman",B.H2,new A.ay8(a)))
+if(s===B.aT)B.m.O(p,A.b([new A.li(B.aj5,"Pengurus",B.V,new A.ay9(a)),new A.li(B.ajl,"Pengaturan",B.X,new A.aya(a))],q))
 s=r.$4(B.ne,B.Bb,"Profil",B.ey)
 if(s!=null)p.push(s)
 return p}}
@@ -151053,27 +151051,28 @@ r=s.a(a.h(0,"santri"))
 q=t.nA
 p=q.a(a.h(0,"kamar"))
 o=q.a(a.h(0,"keuangan"))
-q=A.eB(r.h(0,"aktif"))
-n=$.Ch()
-m=t.p
-q=A.b([A.pL(B.bn,j,B.V,B.pn,"Santri aktif",n.aX(q==null?0:q))],m)
+e=g.aKg(f,e,i)
+f=A.eB(r.h(0,"aktif"))
+g=$.Ch()
+q=t.p
+f=A.b([A.pL(B.bn,j,B.V,B.pn,"Santri aktif",g.aX(f==null?0:f))],q)
 if(h===B.aT){h=A.eB(r.h(0,"putra"))
-h=A.pL(B.jX,j,B.ey,B.IG,"Putra",n.aX(h==null?0:h))
-l=A.eB(r.h(0,"putri"))
-B.m.O(q,A.b([h,A.pL(B.Gz,j,B.Gv,B.ID,"Putri",n.aX(l==null?0:l))],m))}h=A.eB(r.h(0,"tanpa_kamar"))
-q.push(A.pL(B.dY,j,B.cr,B.ais,"Belum dapat kamar",n.aX(h==null?0:h)))
-h=A.b([B.AY,B.cy,new A.BB("Santri",j),A.a5F(q,2,12,142,12,j,B.kZ,!0),B.cy,new A.BB("Menu",j),new A.Wh(g.aKg(f,e,i),j)],m)
-if(p!=null)B.m.O(h,A.b([B.cy,new A.BB("Kamar",j),new A.al5(p,j)],m))
-if(o!=null){g=s.a(o.h(0,"saldo_kas"))
-f=A.eB(o.h(0,"pembayaran_menunggu"))
-f=A.pL(B.dY,j,B.cr,B.B7,"Menunggu verifikasi",n.aX(f==null?0:f))
-e=A.eB(o.h(0,"pembayaran_bulan_ini"))
-q=$.er()
-e=A.pL(B.bn,j,B.V,B.B2,"Diterima bulan ini",q.aX(e==null?0:e))
+h=A.pL(B.jX,j,B.ey,B.IG,"Putra",g.aX(h==null?0:h))
+n=A.eB(r.h(0,"putri"))
+B.m.O(f,A.b([h,A.pL(B.Gz,j,B.Gv,B.ID,"Putri",g.aX(n==null?0:n))],q))}h=A.eB(r.h(0,"tanpa_kamar"))
+f.push(A.pL(B.dY,j,B.cr,B.ais,"Belum dapat kamar",g.aX(h==null?0:h)))
+h=A.b([B.AY,B.cy,new A.BB("Menu",j),new A.Wh(e,j),B.cy,new A.BB("Santri",j),A.a5F(f,2,12,142,12,j,B.kZ,!0)],q)
+if(p!=null)B.m.O(h,A.b([B.cy,new A.BB("Kamar",j),new A.al5(p,j)],q))
+if(o!=null){f=s.a(o.h(0,"saldo_kas"))
+e=A.eB(o.h(0,"pembayaran_menunggu"))
+e=A.pL(B.dY,j,B.cr,B.B7,"Menunggu verifikasi",g.aX(e==null?0:e))
+n=A.eB(o.h(0,"pembayaran_bulan_ini"))
+m=$.er()
+n=A.pL(B.bn,j,B.V,B.B2,"Diterima bulan ini",m.aX(n==null?0:n))
 l=A.eB(o.h(0,"total_tunggakan"))
-q=q.aX(l==null?0:l)
+m=m.aX(l==null?0:l)
 l=A.eB(o.h(0,"tagihan_belum_lunas"))
-B.m.O(h,A.b([B.cy,new A.BB("Keuangan",j),new A.aoW(i,g,j),B.bo,A.a5F(A.b([f,e,A.pL(B.ei,n.aX(l==null?0:l)+" tagihan",B.aQ,B.j2,"Total tunggakan",q)],m),2,12,142,12,j,B.kZ,!0)],m))}h.push(B.cy)
+B.m.O(h,A.b([B.cy,new A.BB("Keuangan",j),new A.aoW(i,f,j),B.bo,A.a5F(A.b([e,n,A.pL(B.ei,g.aX(l==null?0:l)+" tagihan",B.aQ,B.j2,"Total tunggakan",m)],q),2,12,142,12,j,B.kZ,!0)],q))}h.push(B.cy)
 h.push(new A.WT(J.kD(t.j.a(a.h(0,"pengumuman_terbaru")),s),j))
 i=h}return A.b([new A.rZ(B.Ac,new A.GN(A.GK(i,!0,!0,!0),j),j)],t.p)},
 $S:869}
@@ -151084,6 +151083,15 @@ A.ay6.prototype={
 $0(){return this.a.$1(2)},
 $S:0}
 A.ay1.prototype={
+$0(){return A.de(this.a,"/buku-saku",t.X)},
+$S:0}
+A.ay2.prototype={
+$0(){return this.a.$1(1)},
+$S:0}
+A.ay3.prototype={
+$0(){return this.a.$1(3)},
+$S:0}
+A.ay4.prototype={
 $0(){var s=0,r=A.t(t.H),q=this
 var $async$$0=A.o(function(a,b){if(a===1)return A.p(b,r)
 for(;;)switch(s){case 0:s=2
@@ -151092,15 +151100,6 @@ case 2:q.c.ds($.tT())
 return A.q(null,r)}})
 return A.r($async$$0,r)},
 $S:2}
-A.ay2.prototype={
-$0(){return A.de(this.a,"/buku-saku",t.X)},
-$S:0}
-A.ay3.prototype={
-$0(){return this.a.$1(1)},
-$S:0}
-A.ay4.prototype={
-$0(){return this.a.$1(3)},
-$S:0}
 A.ayb.prototype={
 $4(a,b,c,d){var s=this.a
 return B.m.n(s,a)?new A.li(b,c,d,new A.ayc(this.b,s,a)):null},
@@ -151109,16 +151108,16 @@ A.ayc.prototype={
 $0(){return this.a.bp($.Kf().gn6(),t.zh).GO(B.m.ir(this.b,this.c))},
 $S:0}
 A.ay7.prototype={
-$0(){return A.de(this.a,"/pengumuman",t.X)},
+$0(){return A.de(this.a,"/buku-saku",t.X)},
 $S:0}
 A.ay8.prototype={
-$0(){return A.de(this.a,"/pengurus",t.X)},
+$0(){return A.de(this.a,"/pengumuman",t.X)},
 $S:0}
 A.ay9.prototype={
-$0(){return A.de(this.a,"/pengaturan",t.X)},
+$0(){return A.de(this.a,"/pengurus",t.X)},
 $S:0}
 A.aya.prototype={
-$0(){return A.de(this.a,"/buku-saku",t.X)},
+$0(){return A.de(this.a,"/pengaturan",t.X)},
 $S:0}
 A.akm.prototype={
 h3(a,b){var s,r,q,p,o,n,m,l,k=null,j=A.z(a).ok,i=this.f,h=i==null,g=h?k:i.h(0,"santri")
